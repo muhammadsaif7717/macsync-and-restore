@@ -1,0 +1,19 @@
+[user]
+	name = MD. Saif Islam
+	email = muhammadsaif7717@gmail.com
+[init]
+	defaultBranch = main
+[core]
+	editor = code --wait
+	autocrlf = input
+	filemode = false
+[pull]
+	rebase = false
+[fetch]
+	prune = true
+[push]
+	autoSetupRemote = true
+[credential]
+	helper = osxkeychain
+[rerere]
+	enabled = true
