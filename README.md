@@ -54,6 +54,22 @@ If the app fails to open after installation (due to macOS Gatekeeper restriction
 sudo xattr -cr "/Applications/MacSync & Restore.app"
 ```
 
+### 🔄 Update via Brew
+
+To update MacSync & Restore to the latest version, run:
+
+```bash
+brew upgrade --cask macsync-and-restore
+```
+
+### 🗑️ Uninstall via Brew
+
+To completely uninstall MacSync & Restore from your system, run:
+
+```bash
+brew uninstall --cask macsync-and-restore
+```
+
 ## 📄 License
 
 This software is provided under a custom End User License Agreement (EULA). Users are free to download and use the compiled application. However, the source code is proprietary and may not be cloned, copied, modified, merged, or published. The author is not responsible for any system issues. See the `LICENSE` file for full details.
