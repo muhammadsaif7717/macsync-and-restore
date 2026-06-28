@@ -1,4 +1,4 @@
-# 🧠 MacSync & Restore (v1.0.0)
+# 🧠 MacSync & Restore
 
 A powerful, streamlined macOS bootstrap and development environment orchestrator with a beautiful GUI. Easily backup, restore, update, and monitor your macOS development environment with a single click.
 
