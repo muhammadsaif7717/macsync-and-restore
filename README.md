@@ -23,61 +23,23 @@ A powerful, streamlined macOS bootstrap and development environment orchestrator
 You can easily package MacSync & Restore as a `.dmg` file for easy distribution and installation on any Mac.
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
-
 2. Build the `.dmg` installer:
+
    ```bash
    npm run dist
    ```
-
 3. The generated `.dmg` will be placed in the `dist/` directory.
 
----
 
-## 🌐 Publishing to GitHub Releases
 
-1. Go to your GitHub repository and click on **Releases > Draft a new release**.
-2. Create a new tag (e.g., `v1.0.0`).
-3. Set the title as **MacSync & Restore v1.0.0**.
-4. Drag and drop the `.dmg` file from your `dist/` folder into the release assets section.
-5. Click **Publish release**.
+## 🍺 Install via Brew
 
----
-
-## 🍺 Publishing to Homebrew Cask
-
-You can allow users to install MacSync & Restore via Homebrew: `brew install --cask macsync-and-restore`
-
-### 1. Create a Homebrew Tap
-Create a new GitHub repository called `homebrew-tap` (e.g., `github.com/username/homebrew-tap`).
-
-### 2. Get the SHA256 Checksum
-Run the following command on your exported `.dmg` file to get its checksum:
-```bash
-shasum -a 256 path/to/MacSync-and-Restore-1.0.0.dmg
-```
-
-### 3. Create the Cask Formula
-In your new `homebrew-tap` repository, create a folder called `Casks` and add a file named `macsync-and-restore.rb`:
-
-```ruby
-cask "macsync-and-restore" do
-  version "1.0.0"
-  sha256 "YOUR_SHA256_CHECKSUM_HERE"
-
-  url "https://github.com/username/MacSyncAndRestore/releases/download/v#{version}/MacSync-and-Restore-#{version}.dmg"
-  name "MacSync & Restore"
-  desc "A powerful Mac environment setup and backup orchestrator"
-  homepage "https://github.com/username/MacSyncAndRestore"
-
-  app "MacSync & Restore.app"
-end
-```
-
-### 4. Install via Brew
 Once you push the tap to GitHub, anyone can install MacSync & Restore using:
+
 ```bash
 brew tap username/tap
 brew install --cask macsync-and-restore
@@ -85,6 +47,16 @@ brew install --cask macsync-and-restore
 
 ---
 
+
+
+### ⚠️ Troubleshooting Installation
+
+If the app fails to open after installation (due to macOS Gatekeeper restrictions on unsigned apps), run the following command in your terminal to remove the quarantine attribute:
+
+```bash
+sudo xattr -cr "/Applications/MacSync & Restore.app"
+```
+
 ## 📄 License
 
-This project is licensed under the MIT License. Feel free to customize and configure it for your personal use.
+This software is provided under a custom End User License Agreement (EULA). Users are free to download and use the compiled application. However, the source code is proprietary and may not be cloned, copied, modified, merged, or published. The author is not responsible for any system issues. See the `LICENSE` file for full details.

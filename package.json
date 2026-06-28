@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Desktop GUI for MacSync & Restore macOS bootstrap environment",
   "main": "main.js",
+  "author": "Muhammad Saif",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": "github:muhammadsaif7717/macsync-and-restore",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --mac",
