@@ -34,20 +34,17 @@ You can easily package MacSync & Restore as a `.dmg` file for easy distribution 
    ```
 3. The generated `.dmg` will be placed in the `dist/` directory.
 
-
-
 ## 🍺 Install via Brew
 
 Once you push the tap to GitHub, anyone can install MacSync & Restore using:
 
 ```bash
-brew tap username/tap
+brew tap muhammadsaif7717/apps
+brew trust muhammadsaif7717/apps
 brew install --cask macsync-and-restore
 ```
 
 ---
-
-
 
 ### ⚠️ Troubleshooting Installation
 
