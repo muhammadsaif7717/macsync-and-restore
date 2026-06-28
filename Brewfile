@@ -23,7 +23,7 @@ brew "mas"
 # Fast, disk space efficient package manager
 brew "pnpm"
 # Object-relational database system
-brew "postgresql@18", restart_service: :changed, link: true
+brew "postgresql@18", link: true
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Display directories as trees (with optional color/HTML output)
@@ -74,4 +74,3 @@ vscode "steoates.autoimport"
 vscode "usernamehw.errorlens"
 vscode "vscode-icons-team.vscode-icons"
 vscode "zignd.html-css-class-completion"
-npm "corepack"

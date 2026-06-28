@@ -14,11 +14,11 @@ print_help() {
   echo "======================================"
   echo ""
   echo "Commands:"
+  echo "  install  - Install and restore environments"
+  echo "  backup   - Backup developer settings"
   echo "  doctor   - System health check"
   echo "  update   - Update system packages"
   echo "  cleanup  - Clean system cache"
-  echo "  backup   - Backup system config"
-  echo "  install  - Restore full system"
   echo ""
 }
 
@@ -27,6 +27,16 @@ run_script() {
 }
 
 case "$1" in
+
+  install)
+    echo -e "${GREEN}Running System Install...${NC}"
+    run_script install
+    ;;
+
+  backup)
+    echo -e "${GREEN}Running System Backup...${NC}"
+    run_script backup
+    ;;
 
   doctor)
     echo -e "${GREEN}Running System Doctor...${NC}"
@@ -41,16 +51,6 @@ case "$1" in
   cleanup)
     echo -e "${YELLOW}Cleaning System...${NC}"
     run_script cleanup
-    ;;
-
-  backup)
-    echo -e "${GREEN}Backing up System...${NC}"
-    run_script backup
-    ;;
-
-  install)
-    echo -e "${RED}Restoring System...${NC}"
-    run_script install
     ;;
 
   --help)

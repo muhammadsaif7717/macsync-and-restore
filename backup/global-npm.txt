@@ -1,4 +1,0 @@
-/Users/esra/.local/share/fnm/node-versions/v24.18.0/installation/lib
-├── corepack@0.35.0
-└── npm@11.17.0
-

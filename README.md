@@ -1,16 +1,16 @@
-# 🧠 MacSetup (v2.0)
+# 🧠 MacSync & Restore (v1.0.0)
 
-A powerful, streamlined macOS bootstrap and development environment orchestrator. Easily backup, restore, update, and monitor your macOS development environment with a single CLI entry point.
+A powerful, streamlined macOS bootstrap and development environment orchestrator with a beautiful GUI. Easily backup, restore, update, and monitor your macOS development environment with a single click.
 
 ---
 
-## 🚀 Overview
+## 🚀 Overview & Project Analysis
 
-`MacSetup` automates the setup of a new Mac or keeping your current development workspace clean, updated, and backed up. It provides a simple CLI wrapper (`./macsetup`) that orchestrates individual bash scripts to handle:
+`MacSync & Restore` automates the setup of a new Mac or keeping your current development workspace clean, updated, and backed up. It provides an intuitive Electron-based graphical interface that handles:
 
 - **System Provisioning:** Install Xcode Command Line Tools, Homebrew, and all dependencies defined in your `Brewfile`.
 - **Configuration Restore:** Seamlessly copy your SSH keys, Git configuration, and Shell profile configurations (`.zshrc`, `.zprofile`, `.zshenv`).
-- **Database Services:** Automatically start core databases like PostgreSQL and MongoDB Community.
+- **Database Services:** Automatically start core databases like PostgreSQL and MongoDB Community directly from the dashboard.
 - **Global Package Restores:** Restore global npm packages.
 - **Package Updates:** Keep Homebrew packages, Mac App Store apps (via `mas`), and global package managers up to date.
 - **Health Checks & Diagnostics:** Verify installed tools, active services, disk space, and GitHub SSH connectivity.
@@ -18,132 +18,69 @@ A powerful, streamlined macOS bootstrap and development environment orchestrator
 
 ---
 
-## 📂 Project Structure
+## 📦 Building MacSync & Restore for macOS
 
-Here is how the repository is structured:
+You can easily package MacSync & Restore as a `.dmg` file for easy distribution and installation on any Mac.
 
-```text
-MacSetup/
-├── Brewfile              # List of Homebrew formulae, casks, and VS Code extensions
-├── LICENSE               # License information
-├── README.md             # This documentation
-├── backup/               # Stored backups of shell configurations, SSH keys, etc. (Git-ignored)
-├── config/
-│   └── macsetup.json     # Configuration file for features and preferences
-├── macsetup              # CLI entry point (Shell wrapper script)
-└── scripts/              # Under the hood execution scripts
-    ├── backup.sh         # Backs up active configs & exports current dependencies
-    ├── cleanup.sh        # Frees up system and package manager caches
-    ├── doctor.sh         # Runs health checks on active database/tool configurations
-    ├── install.sh        # Fresh system installer and configuration restorer
-    └── update.sh         # Upgrades Homebrew, App Store, and global package engines
-```
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Build the `.dmg` installer:
+   ```bash
+   npm run dist
+   ```
+
+3. The generated `.dmg` will be placed in the `dist/` directory.
 
 ---
 
-## 🛠️ Getting Started
+## 🌐 Publishing to GitHub Releases
 
-To get started, clone this repository and ensure the CLI wrapper script is executable:
-
-```bash
-chmod +x ./macsetup
-```
-
-You can view the CLI help and available options anytime:
-
-```bash
-./macsetup
-```
+1. Go to your GitHub repository and click on **Releases > Draft a new release**.
+2. Create a new tag (e.g., `v1.0.0`).
+3. Set the title as **MacSync & Restore v1.0.0**.
+4. Drag and drop the `.dmg` file from your `dist/` folder into the release assets section.
+5. Click **Publish release**.
 
 ---
 
-## 💻 CLI Commands
+## 🍺 Publishing to Homebrew Cask
 
-The main entry point `./macsetup` supports the following subcommands:
+You can allow users to install MacSync & Restore via Homebrew: `brew install --cask macsync-and-restore`
 
-### 1. `install`
-Restores or bootstraps a fresh system from the existing backups and the `Brewfile`.
+### 1. Create a Homebrew Tap
+Create a new GitHub repository called `homebrew-tap` (e.g., `github.com/username/homebrew-tap`).
+
+### 2. Get the SHA256 Checksum
+Run the following command on your exported `.dmg` file to get its checksum:
 ```bash
-./macsetup install
+shasum -a 256 path/to/MacSync-and-Restore-1.0.0.dmg
 ```
-* **What it does:**
-  * Validates/installs Xcode Command Line Tools & Homebrew.
-  * Restores packages from `Brewfile` (formulae, casks, VS Code extensions).
-  * Copies shell configs (`.zshrc`, `.zprofile`, `.zshenv`) to your home (`~`) directory.
-  * Restores Git config (`.gitconfig`) and SSH configuration (`~/.ssh`).
-  * Restores global npm packages.
-  * Starts database services (MongoDB & PostgreSQL).
-  * Validates Git SSH connectivity and displays active Node environment details.
 
-### 2. `backup`
-Backs up your current local configuration to the `./backup` folder and exports dependencies.
+### 3. Create the Cask Formula
+In your new `homebrew-tap` repository, create a folder called `Casks` and add a file named `macsync-and-restore.rb`:
+
+```ruby
+cask "macsync-and-restore" do
+  version "1.0.0"
+  sha256 "YOUR_SHA256_CHECKSUM_HERE"
+
+  url "https://github.com/username/MacSyncAndRestore/releases/download/v#{version}/MacSync-and-Restore-#{version}.dmg"
+  name "MacSync & Restore"
+  desc "A powerful Mac environment setup and backup orchestrator"
+  homepage "https://github.com/username/MacSyncAndRestore"
+
+  app "MacSync & Restore.app"
+end
+```
+
+### 4. Install via Brew
+Once you push the tap to GitHub, anyone can install MacSync & Restore using:
 ```bash
-./macsetup backup
-```
-* **What it does:**
-  * Backs up shell profiles, SSH configs, and Git config.
-  * Dumps a list of active Homebrew formulae and casks to `Brewfile`.
-  * Saves lists of globally installed npm/yarn packages.
-  * Logs GitHub CLI authentication status and captures system specifications.
-  * Records active node/npm/yarn/brew/db versions into `dev-environment.txt`.
-
-### 3. `doctor`
-Performs a suite of system diagnostics.
-```bash
-./macsetup doctor
-```
-* **What it does:**
-  * Checks for installed developer utilities (`git`, `brew`, `node`, etc.).
-  * Verifies database commands/instances (`mongod`, `psql`).
-  * Lists running background services via `brew services`.
-  * Runs `brew doctor` and tests GitHub SSH authentication.
-  * Displays current disk space usage.
-
-### 4. `update`
-Keeps your tools and dependencies up-to-date.
-```bash
-./macsetup update
-```
-* **What it does:**
-  * Runs Homebrew self-update and upgrades all formulas and casks.
-  * Autoremoves orphaned dependencies and cleans up Homebrew cache.
-  * Upgrades apps installed from the Mac App Store (via `mas`).
-  * Upgrades global npm and pnpm instances to their latest versions.
-
-### 5. `cleanup`
-Frees up disk space by purging local temporary files and build caches.
-```bash
-./macsetup cleanup
-```
-* **What it does:**
-  * Clears Homebrew download cache.
-  * Forces a clean of the local npm cache.
-  * Prunes unused packages from the global pnpm store.
-  * Deletes macOS user log files (`~/Library/Logs/*`).
-
----
-
-## ⚙️ Configuration
-
-System options can be customized in [macsetup.json](file:///Users/esra/MacSetup/config/macsetup.json):
-
-```json
-{
-  "name": "MacSetup",
-  "version": "2.0",
-  "author": "Saif",
-  "features": {
-    "backup": true,
-    "restore": true,
-    "update": true,
-    "cleanup": true,
-    "doctor": true
-  },
-  "preferences": {
-    "show_colors": true,
-    "log_enabled": true
-  }
-}
+brew tap username/tap
+brew install --cask macsync-and-restore
 ```
 
 ---

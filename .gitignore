@@ -61,3 +61,10 @@ dist/
 *.tar
 *.gz
 *.7z
+
+# ==================================================
+# MacSetup Backup Secrets
+# ==================================================
+backup/.ssh/ghp
+backup/.ssh/ghw
+backup/

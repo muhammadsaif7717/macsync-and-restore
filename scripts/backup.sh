@@ -1,217 +1,99 @@
 #!/bin/bash
 
-set -e
-
-# ==========================================================
-# MacSetup - Backup Script (Final Clean Version)
-# ==========================================================
-
-PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-BACKUP_DIR="$PROJECT_DIR/backup"
-
-echo "=================================================="
-echo "📦 MacSetup Backup"
-echo "=================================================="
-
+# Create backup directory
+BACKUP_DIR="./backup"
 mkdir -p "$BACKUP_DIR"
 
-# ----------------------------------------------------------
-# Step 1 - Shell Configuration
-# ----------------------------------------------------------
+echo "======================================"
+echo "📦 MacSetup - Environment Backup"
+echo "======================================"
 
+# 1. Backing up shell configurations
 echo
-echo "[1/10] Backing up Shell configuration..."
-
-for file in .zshrc .zprofile .zshenv; do
-    if [[ -f "$HOME/$file" ]]; then
-        cp "$HOME/$file" "$BACKUP_DIR/"
-        echo "✓ $file"
-    fi
+echo "[1/5] Backing up shell profiles..."
+for file in ~/.zshrc ~/.zprofile ~/.zshenv ~/.bashrc ~/.bash_profile ~/.config/fish/config.fish; do
+  if [ -f "$file" ]; then
+    cp "$file" "$BACKUP_DIR/"
+    echo "✓ Backed up: $(basename "$file")"
+  fi
 done
 
-# ----------------------------------------------------------
-# Step 2 - Git
-# ----------------------------------------------------------
-
+# 2. Backing up Git and SSH configs
 echo
-echo "[2/10] Backing up Git configuration..."
-
-if [[ -f "$HOME/.gitconfig" ]]; then
-    cp "$HOME/.gitconfig" "$BACKUP_DIR/"
-    echo "✓ .gitconfig"
+echo "[2/5] Backing up Git and SSH configurations..."
+if [ -f ~/.gitconfig ]; then
+  cp ~/.gitconfig "$BACKUP_DIR/"
+  echo "✓ Backed up: .gitconfig"
+fi
+if [ -f ~/.gitignore_global ]; then
+  cp ~/.gitignore_global "$BACKUP_DIR/"
+  echo "✓ Backed up: .gitignore_global"
 fi
 
-# ----------------------------------------------------------
-# Step 3 - SSH
-# ----------------------------------------------------------
-
-echo
-echo "[3/10] Backing up SSH..."
-
-if [[ -d "$HOME/.ssh" ]]; then
-
-    rm -rf "$BACKUP_DIR/.ssh"
-    mkdir -p "$BACKUP_DIR/.ssh"
-
-    find "$HOME/.ssh" -type f | while read -r file; do
-        relative="${file#$HOME/.ssh/}"
-        mkdir -p "$BACKUP_DIR/.ssh/$(dirname "$relative")"
-        cp "$file" "$BACKUP_DIR/.ssh/$relative"
-    done
-
-    echo "✓ .ssh"
-
-else
-    echo "⚠ .ssh directory not found"
+if [ -d ~/.ssh ]; then
+  mkdir -p "$BACKUP_DIR/.ssh"
+  # Copy config, known_hosts and public keys securely
+  for file in ~/.ssh/config ~/.ssh/known_hosts ~/.ssh/*.pub; do
+    if [ -f "$file" ]; then
+      cp "$file" "$BACKUP_DIR/.ssh/"
+      echo "✓ Backed up SSH file: $(basename "$file")"
+    fi
+  done
 fi
 
-# ----------------------------------------------------------
-# Step 4 - Brewfile
-# ----------------------------------------------------------
-
+# 3. Damping Brewfile
 echo
-echo "[4/10] Exporting Brewfile..."
-
+echo "[3/5] Exporting Homebrew Brewfile..."
 if command -v brew >/dev/null 2>&1; then
-    brew bundle dump --force --file="$PROJECT_DIR/Brewfile"
-    cp "$PROJECT_DIR/Brewfile" "$BACKUP_DIR/"
-    echo "✓ Brewfile"
+  brew bundle dump --force --file="./Brewfile"
+  echo "✓ Brewfile successfully updated at ./Brewfile"
 else
-    echo "⚠ Homebrew not installed"
+  echo "⚠️ Homebrew not detected, skipping Brewfile dump."
 fi
 
-# ----------------------------------------------------------
-# Step 5 - Brew Packages
-# ----------------------------------------------------------
-
+# 4. Global Package Managers
 echo
-echo "[5/10] Saving installed packages..."
-
-if command -v brew >/dev/null 2>&1; then
-    brew list > "$BACKUP_DIR/brew-formulae.txt"
-    brew list --cask > "$BACKUP_DIR/brew-casks.txt"
-    echo "✓ Formulae"
-    echo "✓ Casks"
-fi
-
-# ----------------------------------------------------------
-# Step 6 - Global Packages (npm only)
-# ----------------------------------------------------------
-
-echo
-echo "[6/10] Saving global npm packages..."
+echo "[4/5] Listing global package configurations..."
+mkdir -p "$BACKUP_DIR/packages"
 
 if command -v npm >/dev/null 2>&1; then
-    npm list -g --depth=0 > "$BACKUP_DIR/global-npm.txt" 2>/dev/null || true
-    echo "✓ npm"
+  npm list -g --depth=0 > "$BACKUP_DIR/packages/npm-globals.txt" 2>/dev/null || true
+  echo "✓ Saved npm global packages list"
 fi
-
-echo "⚠ pnpm skipped intentionally"
-
 if command -v yarn >/dev/null 2>&1; then
-    yarn global list > "$BACKUP_DIR/global-yarn.txt" 2>/dev/null || true
-    echo "✓ yarn"
+  yarn global list --depth=0 > "$BACKUP_DIR/packages/yarn-globals.txt" 2>/dev/null || true
+  echo "✓ Saved Yarn global packages list"
+fi
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm list -g --depth=0 > "$BACKUP_DIR/packages/pnpm-globals.txt" 2>/dev/null || true
+  echo "✓ Saved pnpm global packages list"
 fi
 
-# ----------------------------------------------------------
-# Step 7 - GitHub Auth
-# ----------------------------------------------------------
-
+# 5. Developer environment versions
 echo
-echo "[7/10] Saving GitHub authentication..."
+echo "[5/5] Logging developer environment specs..."
+ENV_LOG="$BACKUP_DIR/dev-environment.txt"
+echo "MacSetup Dev Environment Export - $(date)" > "$ENV_LOG"
+echo "----------------------------------------" >> "$ENV_LOG"
+echo "macOS: $(sw_vers | paste -sd ' ' -)" >> "$ENV_LOG"
+echo "CPU: $(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo 'N/A')" >> "$ENV_LOG"
+
+if command -v node >/dev/null 2>&1; then echo "Node: $(node -v)" >> "$ENV_LOG"; fi
+if command -v npm >/dev/null 2>&1; then echo "npm: $(npm -v)" >> "$ENV_LOG"; fi
+if command -v yarn >/dev/null 2>&1; then echo "Yarn: $(yarn -v)" >> "$ENV_LOG"; fi
+if command -v pnpm >/dev/null 2>&1; then echo "pnpm: $(pnpm -v)" >> "$ENV_LOG"; fi
+if command -v brew >/dev/null 2>&1; then echo "Brew: $(brew --version | head -n 1)" >> "$ENV_LOG"; fi
+if command -v fnm >/dev/null 2>&1; then echo "FNM: $(fnm --version)" >> "$ENV_LOG"; fi
 
 if command -v gh >/dev/null 2>&1; then
-    gh auth status > "$BACKUP_DIR/github-auth.txt" 2>&1 || true
-    echo "✓ GitHub CLI"
-else
-    echo "⚠ GitHub CLI not installed"
+  echo "----------------------------------------" >> "$ENV_LOG"
+  echo "GitHub CLI Authentication Status:" >> "$ENV_LOG"
+  gh auth status >> "$ENV_LOG" 2>&1 || true
 fi
 
-# ----------------------------------------------------------
-# Step 8 - System Information (clean)
-# ----------------------------------------------------------
+echo "✓ Saved environmental details to $ENV_LOG"
 
 echo
-echo "[8/10] Saving system information..."
-
-{
-    echo "macOS:"
-    sw_vers
-
-    echo
-    echo "Kernel:"
-    uname -a
-
-    echo
-    echo "CPU:"
-    sysctl -n machdep.cpu.brand_string 2>/dev/null || true
-
-    echo
-    echo "Memory:"
-    sysctl hw.memsize 2>/dev/null || true
-
-    echo
-    echo "Disk:"
-    df -h
-
-} > "$BACKUP_DIR/system-info.txt"
-
-echo "✓ System Information"
-
-# ----------------------------------------------------------
-# Step 9 - Development Environment
-# ----------------------------------------------------------
-
-echo
-echo "[9/10] Saving development environment..."
-
-{
-    echo "Node:"
-    node -v 2>/dev/null || true
-
-    echo
-    echo "npm:"
-    npm -v 2>/dev/null || true
-
-    echo
-    echo "Yarn:"
-    yarn -v 2>/dev/null || true
-
-    echo
-    echo "Git:"
-    git --version
-
-    echo
-    echo "Homebrew:"
-    brew --version
-
-    echo
-    echo "MongoDB:"
-    mongod --version 2>/dev/null || true
-
-    echo
-    echo "PostgreSQL:"
-    psql --version 2>/dev/null || true
-} > "$BACKUP_DIR/dev-environment.txt"
-
-echo "✓ Development Environment"
-
-# ----------------------------------------------------------
-# Step 10 - Summary
-# ----------------------------------------------------------
-
-echo
-echo "[10/10] Backup summary"
-
-echo
-echo "Backup Location:"
-echo "$BACKUP_DIR"
-
-echo
-echo "Files Saved:"
-ls -A "$BACKUP_DIR"
-
-echo
-echo "=================================================="
-echo "✅ Backup completed successfully!"
-echo "=================================================="
+echo "======================================"
+echo "✅ Environment backup complete"
+echo "======================================"

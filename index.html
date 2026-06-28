@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MacSync & Restore Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header for frameless macOS dragging -->
+  <header class="app-header">
+    <div class="header-title">🧠 MacSync & Restore v1.0.0</div>
+    <button id="btn-header-terminal" class="btn-header-action active" style="left: auto; right: 12px;" onclick="toggleTerminalVisibility()" title="Toggle Console">🖥️ Logs</button>
+  </header>
+
+  <div class="app-container">
+    <!-- Main Content: Actions and Terminal Console -->
+    <main class="main-content">
+      <nav class="tabs-nav" style="position: relative;">
+        <div class="tab-slider-indicator" id="tab-slider-indicator"></div>
+        <button id="tab-btn-backup" class="tab-btn active" onclick="switchTab('backup-tab')">📦 Backup Profile</button>
+        <button id="tab-btn-restore" class="tab-btn" onclick="switchTab('restore-tab')">🚀 Restore Profile</button>
+        <button id="tab-btn-maintenance" class="tab-btn" onclick="switchTab('maintenance-tab')">🩺 Maintenance & Tools</button>
+        <button id="tab-btn-database" class="tab-btn" onclick="switchTab('database-tab')">🗄️ Database Services</button>
+      </nav>
+
+      <!-- Backup Tab Panel -->
+      <div id="backup-tab" class="tab-panel active">
+        <div class="panel-card">
+          <h4>Create Portable Backup</h4>
+          <p class="panel-desc">Select configurations and developer environments to include in your backup. The app will generate a single secure JSON file that you can save anywhere.</p>
+          
+          <div class="search-filter-wrapper" style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+            <input type="text" id="backup-search" class="search-input" placeholder="🔍 Search backup configurations (e.g., ssh, git, vscode)..." oninput="filterBackupChecklist()" style="flex: 1; margin-bottom: 0;">
+            <button id="btn-rescan-backup" class="btn-secondary" onclick="scanBackupEnvironment()" style="white-space: nowrap; margin-bottom: 0; padding: 10px 18px;">🔄 Rescan</button>
+          </div>
+
+          <div class="checklist-actions" style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button class="btn-secondary" style="padding: 6px 12px; font-size: 11px; margin-bottom: 0;" onclick="toggleChecklist('backup', true)">✓ Select All</button>
+            <button class="btn-secondary" style="padding: 6px 12px; font-size: 11px; margin-bottom: 0;" onclick="toggleChecklist('backup', false)">✕ Deselect All</button>
+          </div>
+          
+          <div id="backup-checklist" class="checklist-grid">
+            <div class="loading-placeholder">Scanning environment configurations...</div>
+          </div>
+
+          <div class="encryption-wrapper" style="display: flex; flex-direction: column; gap: 6px; margin-top: 15px;">
+            <label for="backup-password" style="font-size: 12px; color: var(--text-muted); font-weight: 500;">🔒 Backup Encryption Password (Optional / Highly Recommended)</label>
+            <div style="display: flex; gap: 8px; align-items: center; max-width: 450px;">
+              <input type="password" id="backup-password" class="search-input" placeholder="Enter password to encrypt backup secrets..." style="margin-bottom: 0; flex: 1;">
+              <button type="button" class="btn-secondary" onclick="togglePasswordVisibility('backup-password')" style="padding: 8px 12px; margin-bottom: 0;" title="Toggle Password Visibility">👁️</button>
+            </div>
+          </div>
+
+          <div class="panel-actions" style="margin-top: 15px;">
+            <button id="btn-export-backup" class="btn-primary" onclick="runBackup()" disabled>Generate & Save Backup JSON</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Restore Tab Panel -->
+      <div id="restore-tab" class="tab-panel" style="display: none;">
+        <div class="panel-card">
+          <h4>Restore Environment</h4>
+          <p class="panel-desc">Select a previously exported backup JSON file to restore your configuration settings and developer packages.</p>
+          
+          <div class="restore-selector">
+            <button id="btn-browse-backup" class="btn-secondary" onclick="browseBackupFile()">📂 Browse Backup JSON File</button>
+            <span id="selected-file-path" class="text-muted">No file selected</span>
+          </div>
+
+          <!-- Decryption password input card, hidden by default -->
+          <div id="restore-decrypt-card" class="meta-card" style="display: none; margin-top: 15px; border-color: rgba(245, 158, 11, 0.3);">
+            <h5>🔒 Encrypted Backup Profile Detected</h5>
+            <p class="panel-desc">This backup file contains encrypted configuration settings. Please enter the password to unlock and decrypt it.</p>
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+              <input type="password" id="restore-password" class="search-input" placeholder="Enter decryption password..." style="flex: 1; margin-bottom: 0;">
+              <button type="button" class="btn-secondary" onclick="togglePasswordVisibility('restore-password')" style="padding: 10px 12px; margin-bottom: 0;" title="Toggle Password Visibility">👁️</button>
+              <button id="btn-decrypt-backup" class="btn-primary" onclick="unlockBackupFile()" style="white-space: nowrap; margin-bottom: 0; padding: 10px 18px;">🔓 Decrypt & Unlock</button>
+            </div>
+          </div>
+
+          <!-- Metadata card, hidden by default -->
+          <div id="restore-meta-card" class="meta-card" style="display: none; margin-top: 15px;">
+            <h5>📋 Backup Profile Details</h5>
+            <div class="meta-dashboard">
+              <div class="meta-analytics">
+                <div class="progress-ring-wrapper">
+                  <svg class="progress-ring" width="100" height="100">
+                    <circle class="progress-ring-circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" r="42" cx="50" cy="50" />
+                    <circle id="progress-ring-circle" class="progress-ring-circle" stroke="var(--teal-accent)" stroke-width="6" stroke-linecap="round" fill="transparent" r="42" cx="50" cy="50" />
+                  </svg>
+                  <div class="progress-ring-text">
+                    <span id="meta-coverage-count" class="count">0/0</span>
+                    <span class="label">Modules</span>
+                  </div>
+                </div>
+                <div class="analytics-metrics">
+                  <div class="metric-card">
+                    <span class="metric-label">Backup Size</span>
+                    <span id="meta-size" class="metric-value">0.00 KB</span>
+                  </div>
+                  <div class="metric-card">
+                    <span class="metric-label">Created On</span>
+                    <span id="meta-date" class="metric-value">N/A</span>
+                  </div>
+                </div>
+              </div>
+              <div class="meta-system-info">
+                <h5>💻 Source Machine Specs</h5>
+                <div class="specs-pills">
+                  <div class="spec-pill" id="meta-macos-pill"><span class="icon">🍎</span> <span id="meta-macos">N/A</span></div>
+                  <div class="spec-pill" id="meta-cpu-pill"><span class="icon">🧠</span> <span id="meta-cpu">N/A</span></div>
+                  <div class="spec-pill" id="meta-mem-pill"><span class="icon">⚡</span> <span id="meta-mem">N/A</span></div>
+                </div>
+              </div>
+            </div>
+            
+            <h5 style="margin-top: 20px;">🔧 Select Components to Restore</h5>
+            <div class="search-filter-wrapper">
+              <input type="text" id="restore-search" class="search-input" placeholder="🔍 Search restore components..." oninput="filterRestoreChecklist()">
+            </div>
+
+            <div class="checklist-actions" style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <button class="btn-secondary" style="padding: 6px 12px; font-size: 11px; margin-bottom: 0;" onclick="toggleChecklist('restore', true)">✓ Select All</button>
+              <button class="btn-secondary" style="padding: 6px 12px; font-size: 11px; margin-bottom: 0;" onclick="toggleChecklist('restore', false)">✕ Deselect All</button>
+            </div>
+
+            <div id="restore-checklist" class="checklist-grid">
+              <!-- Dynamically populated checkboxes -->
+            </div>
+ 
+            <div class="panel-actions" style="margin-top: 20px;">
+              <button id="btn-execute-restore" class="btn-primary" onclick="runRestore()">Execute Selected Restore</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maintenance Tab Panel -->
+      <div id="maintenance-tab" class="tab-panel" style="display: none;">
+        <div class="panel-card">
+          <h4>System Maintenance Utilities</h4>
+          <p class="panel-desc">Run general maintenance, updates, or diagnostics directly through the system CLI orchestrators.</p>
+          
+          <div class="maintenance-grid">
+            <button class="action-card btn-doctor" onclick="triggerScript('doctor')">
+              <div class="card-icon">🩺</div>
+              <div class="card-text">
+                <h4>Doctor Diagnostics</h4>
+                <p>Verify software, ports & network dependencies</p>
+              </div>
+            </button>
+
+            <button class="action-card btn-update" onclick="triggerScript('update')">
+              <div class="card-icon">🔄</div>
+              <div class="card-text">
+                <h4>Update Systems</h4>
+                <p>Upgrade Brew packages, App Store apps & node engines</p>
+              </div>
+            </button>
+
+            <button class="action-card btn-cleanup" onclick="triggerScript('cleanup')">
+              <div class="card-icon">🧹</div>
+              <div class="card-text">
+                <h4>Purge Cache</h4>
+                <p>Clear temporary files, Gradle, NPM/PNPM caches & logs</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Database Services Tab Panel -->
+      <div id="database-tab" class="tab-panel" style="display: none;">
+        <div class="panel-card">
+          <h4>🗄️ Database Services</h4>
+          <p class="panel-desc">Start and stop local database services via Homebrew. Action outputs will be logged to the console.</p>
+          <div class="service-list" style="max-width: 400px; margin-top: 15px;">
+            <div class="service-item">
+              <div class="service-header">
+                <span class="service-name">PostgreSQL</span>
+                <span id="status-postgres" class="status-badge status-checking">checking</span>
+              </div>
+              <div class="service-actions">
+                <button id="btn-start-postgresql" class="btn-service-action btn-start" onclick="controlService('postgresql', 'start')" disabled>Start</button>
+                <button id="btn-stop-postgresql" class="btn-service-action btn-stop" onclick="controlService('postgresql', 'stop')" disabled>Stop</button>
+              </div>
+            </div>
+            <div class="service-item">
+              <div class="service-header">
+                <span class="service-name">MongoDB</span>
+                <span id="status-mongo" class="status-badge status-checking">checking</span>
+              </div>
+              <div class="service-actions">
+                <button id="btn-start-mongodb" class="btn-service-action btn-start" onclick="controlService('mongodb', 'start')" disabled>Start</button>
+                <button id="btn-stop-mongodb" class="btn-service-action btn-stop" onclick="controlService('mongodb', 'stop')" disabled>Stop</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Terminal Output Console -->
+  <section class="terminal-container" id="app-terminal">
+    <div id="terminal-resizer" class="resize-handle-h"></div>
+    <div class="terminal-header">
+      <span class="terminal-title">🖥️ Shell Output Logs</span>
+      <div class="terminal-controls">
+        <button id="btn-terminal-collapse" class="btn-terminal" onclick="toggleTerminalCollapse()">🔽 Collapse</button>
+        <button id="btn-terminate" class="btn-terminal btn-danger" onclick="killScript()" disabled>Stop Process</button>
+        <button class="btn-terminal" onclick="clearTerminal()">Clear Console</button>
+        <button class="btn-terminal btn-danger" onclick="toggleTerminalVisibility()" title="Close Terminal">✕</button>
+      </div>
+    </div>
+    <div id="terminal-body" class="terminal-body">
+      <div class="log-line text-muted">Ready. Select an action to begin.</div>
+    </div>
+  </section>
+
+  <!-- Floating Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -16,7 +16,7 @@ echo "✓ Brew cache cleaned"
 # npm cache
 echo
 echo "[2/9] Cleaning npm cache..."
-npm cache clean --force || true
+npm cache clean --force 2>/dev/null || true
 rm -rf ~/.npm 2>/dev/null || true
 echo "✓ npm cache cleaned"
 

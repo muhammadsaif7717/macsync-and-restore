@@ -34,7 +34,7 @@ echo "✓ npm updated"
 # pnpm update
 echo
 echo "[5/6] Updating pnpm..."
-corepack prepare pnpm@latest --activate || true
+npm install -g pnpm@latest || true
 echo "✓ pnpm updated"
 
 # Brew doctor

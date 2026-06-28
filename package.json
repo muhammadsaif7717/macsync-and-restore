@@ -1,0 +1,36 @@
+{
+  "name": "macsync-and-restore",
+  "version": "1.0.0",
+  "description": "Desktop GUI for MacSync & Restore macOS bootstrap environment",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.macsyncandrestore.app",
+    "productName": "MacSync & Restore",
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.developer-tools"
+    },
+    "dmg": {
+      "title": "MacSync & Restore ${version}"
+    },
+    "extraResources": [
+      {
+        "from": "scripts",
+        "to": "scripts",
+        "filter": ["**/*"]
+      }
+    ]
+  }
+}
