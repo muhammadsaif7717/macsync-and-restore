@@ -1,0 +1,63 @@
+#!/bin/bash
+
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG="$PROJECT_DIR/config/macsetup.json"
+
+GREEN="\033[0;32m"
+YELLOW="\033[1;33m"
+RED="\033[0;31m"
+NC="\033[0m"
+
+print_help() {
+  echo "======================================"
+  echo "🧠 MacSetup v2 CLI"
+  echo "======================================"
+  echo ""
+  echo "Commands:"
+  echo "  doctor   - System health check"
+  echo "  update   - Update system packages"
+  echo "  cleanup  - Clean system cache"
+  echo "  backup   - Backup system config"
+  echo "  install  - Restore full system"
+  echo ""
+}
+
+run_script() {
+  bash "$PROJECT_DIR/scripts/$1.sh"
+}
+
+case "$1" in
+
+  doctor)
+    echo -e "${GREEN}Running System Doctor...${NC}"
+    run_script doctor
+    ;;
+
+  update)
+    echo -e "${GREEN}Updating System...${NC}"
+    run_script update
+    ;;
+
+  cleanup)
+    echo -e "${YELLOW}Cleaning System...${NC}"
+    run_script cleanup
+    ;;
+
+  backup)
+    echo -e "${GREEN}Backing up System...${NC}"
+    run_script backup
+    ;;
+
+  install)
+    echo -e "${RED}Restoring System...${NC}"
+    run_script install
+    ;;
+
+  --help)
+    print_help
+    ;;
+
+  *)
+    print_help
+    ;;
+esac

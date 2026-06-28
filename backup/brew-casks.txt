@@ -1,0 +1,10 @@
+ab-download-manager
+antigravity-ide
+google-chrome
+iina
+maccy
+mongodb-compass
+openmtp
+pgadmin4
+visual-studio-code
+whatsapp

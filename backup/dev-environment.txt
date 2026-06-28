@@ -1,0 +1,30 @@
+Node:
+v24.18.0
+
+npm:
+11.17.0
+
+Yarn:
+1.22.22
+
+Git:
+git version 2.54.0
+
+Homebrew:
+Homebrew 6.0.5
+
+MongoDB:
+db version v8.3.4
+Build Info: {
+    "version": "8.3.4",
+    "gitVersion": "4b03e7daaa316c78b9bf433046dba81637d581c0",
+    "modules": [],
+    "allocator": "system",
+    "environment": {
+        "distarch": "arm64",
+        "target_arch": "arm64"
+    }
+}
+
+PostgreSQL:
+psql (PostgreSQL) 18.4 (Homebrew)
